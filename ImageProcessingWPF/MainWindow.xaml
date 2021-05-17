@@ -1,0 +1,186 @@
+﻿<Window x:Class="ImageProcessingWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageProcessingWPF" 
+        d:DataContext="{d:DesignInstance Type=local:MainViewModel}"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="800" Width="1600">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="4"
+                    Orientation="Vertical"
+                    IsEnabled="{Binding IsAlive}">
+            <Button Command="{Binding CalcHistoCommand}"
+                     Height="25"
+                    Content="Histo" />
+            
+            <UniformGrid Columns="2">
+                <TextBlock Text="Histo width"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding HistoWidth}"/>
+            </UniformGrid>
+
+            <UniformGrid Columns="2">
+                <TextBlock Text="Histo height"
+                           VerticalAlignment="Center" />
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding HistoHeight}"/>
+            </UniformGrid>
+
+            <UniformGrid Columns="2">
+                <TextBlock Text="StackHistoCount"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding StackHistoCount}"/>
+            </UniformGrid>
+
+            <UniformGrid Columns="2">
+                <TextBlock Text="Blur"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding BlurSize}"/>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock Text="Dir thresh"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding DirectionThreshold}"/>
+            </UniformGrid>
+
+
+            <TextBlock Text="{Binding CoeffHisto, StringFormat=gray : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoHue, StringFormat=hue : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoR, StringFormat=red : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoG, StringFormat=green : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoB, StringFormat=blue : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoDir, StringFormat=dir : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoChromR, StringFormat=chromR : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoChromG, StringFormat=chromG : {0:F3}}" />
+            <TextBlock Text="{Binding CoeffHistoMean, StringFormat=Mean : {0:F3}}" FontWeight="Bold" />
+
+            <Label Height="40"/>
+            <Button Command="{Binding HarrisCommand}"
+                     Height="25"
+                    Content="Harris" />
+            <UniformGrid Columns="2">
+                <TextBlock Text="Threshold"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding HarrisThreshold}"/>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock Text="Radius"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding HarrisRadius}"/>
+            </UniformGrid>
+
+            <Label Height="40"/>
+            <Button Command="{Binding SIFTCommand}"
+                     Height="25"
+                    Content="SIFT" />
+            <UniformGrid Columns="2">
+                <TextBlock Text="Uniqueness Threshold"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding UniquenessThreshold}"/>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock Text="Scale Increment"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding ScaleIncrement}"/>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock Text="Rotation Bins"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding RotationBins}"/>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock Text="Ransac Reproj Threshold"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding RansacReprojThreshold}"/>
+            </UniformGrid>
+
+
+        </StackPanel>
+
+        <Border Grid.Row="0" Grid.Column="1" 
+                BorderThickness="1"
+                Background="Gray"
+                BorderBrush="Brown">
+            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+               Source="{Binding ImageSource1}" 
+                   AllowDrop="true"
+                   Drop="Image1_Drop"/>
+        </Border>
+        <Button Grid.Row="1" Grid.Column="1"
+                Content="Load"
+                Command="{Binding LoadImage1Command}"/>
+
+
+        <Border Grid.Row="0" Grid.Column="2" 
+                BorderThickness="1"
+                Background="Gray"
+                BorderBrush="Brown">
+            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+               Source="{Binding ImageSource2}"
+                   AllowDrop="true"
+                   Drop="Image2_Drop" />
+        </Border>
+        <Button Grid.Row="1" Grid.Column="2"
+                Content="Load"
+                Command="{Binding LoadImage2Command}"/>
+
+        
+        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                  x:Name="cbImageStep"
+                  VerticalAlignment="Top"
+                  SelectedValue="{Binding CurImageStep}"/>
+
+        
+        <Border Grid.Row="3" Grid.Column="1" 
+                BorderThickness="1"
+                Background="Gray"
+                BorderBrush="Brown">
+            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+               Source="{Binding ImageResult1}" />
+        </Border>
+
+        <Border Grid.Row="23" Grid.Column="2" 
+                BorderThickness="1"
+                Background="Gray"
+                BorderBrush="Brown">
+            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+               Source="{Binding ImageResult2}" />
+        </Border>
+        
+    </Grid>
+</Window>
