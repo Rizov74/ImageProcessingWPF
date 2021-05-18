@@ -56,6 +56,24 @@
                      Text="{Binding RansacReprojThreshold}"/>
             </UniformGrid>
 
+            <Label Height="40"/>
+            <Label Content="Homotetie :"/>
+            <UniformGrid Rows="3" Columns="3">
+                <UniformGrid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextAlignment" Value="Center"/>
+                    </Style>
+                </UniformGrid.Resources>
+                <TextBlock Text="{Binding Hom00, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom01, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom02, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom10, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom11, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom12, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom20, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom21, StringFormat=f3}"/>
+                <TextBlock Text="{Binding Hom22, StringFormat=f3}"/>
+            </UniformGrid>
 
         </StackPanel>
 
@@ -92,14 +110,7 @@
                   VerticalAlignment="Top"
                   SelectedValue="{Binding CurImageStep}"/>
 
-        
-        <Border Grid.Row="3" Grid.Column="1" 
-                BorderThickness="1"
-                Background="Gray"
-                BorderBrush="Brown">
-            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
-               Source="{Binding ImageResult1}" />
-        </Border>
+
 
         <Border Grid.Row="23" Grid.Column="2" 
                 BorderThickness="1"
@@ -107,6 +118,23 @@
                 BorderBrush="Brown">
             <local:ImageViewer Grid.Row="1" Grid.Column="1" 
                Source="{Binding ImageResult2}" />
+        </Border>
+
+        <Border Grid.Row="3" Grid.Column="1"
+                BorderThickness="1"
+                Background="Gray"
+                BorderBrush="Brown">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers >
+                        <DataTrigger Binding="{Binding CurImageStep}" Value="SIFTResult">
+                            <Setter Property="Grid.ColumnSpan" Value="2" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+               Source="{Binding ImageResult1}" />
         </Border>
         
     </Grid>

@@ -109,17 +109,20 @@ namespace ImageProcessingWPF
         public int RotationBins { get => rotationBins; set => SetValue(ref rotationBins, value); }
         public double RansacReprojThreshold { get => ransacReprojThreshold; set => SetValue(ref ransacReprojThreshold, value); }
 
+        public double? Hom22 { get => hom22; set => SetValue(ref hom22, value); }
+        public double? Hom21 { get => hom21; set => SetValue(ref hom21, value); }
+        public double? Hom20 { get => hom20; set => SetValue(ref hom20, value); }
+        public double? Hom12 { get => hom12; set => SetValue(ref hom12, value); }
+        public double? Hom11 { get => hom11; set => SetValue(ref hom11, value); }
+        public double? Hom10 { get => hom10; set => SetValue(ref hom10, value); }
+        public double? Hom02 { get => hom02; set => SetValue(ref hom02, value); }
+        public double? Hom01 { get => hom01; set => SetValue(ref hom01, value); }
+        public double? Hom00 { get => hom00; set => SetValue(ref hom00, value); }
+
 
         // Work data
         private readonly ImageWork Image1 = new ImageWork();
         private readonly ImageWork Image2 = new ImageWork();
-
-
-        // SIFT Params
-        private double uniquenessThreshold = 0.80;
-        private double scaleIncrement = 1.5;
-        private int rotationBins = 2;
-        private double ransacReprojThreshold = 2;
 
         // GUI
         private bool isAlive;
@@ -131,6 +134,23 @@ namespace ImageProcessingWPF
         private WriteableBitmap imageResult1;
         private WriteableBitmap imageResult2;
 
+        // SIFT Params
+        private double uniquenessThreshold = 0.80;
+        private double scaleIncrement = 1.5;
+        private int rotationBins = 2;
+        private double ransacReprojThreshold = 2;
+
+        // SIFT Results
+        private double? hom00;
+        private double? hom01;
+        private double? hom02;
+        private double? hom10;
+        private double? hom11;
+        private double? hom12;
+        private double? hom20;
+        private double? hom21;
+        private double? hom22;
+                      
         public MainViewModel()
         {
             LoadImage1Command = new RelayCommand(p => LoadImage1());
@@ -223,12 +243,18 @@ namespace ImageProcessingWPF
                     VectorOfKeyPoint imageKeyPoints1 = new VectorOfKeyPoint();
                     Image1.Bmps[ImageStep.SIFTKeypoints] = CalculateDescriptors(mat1, imageDescriptors1, imageKeyPoints1);
 
+                    // Set same image height to minimise offset
                     Image<Bgr, byte> image2CV = Image2.Bmps[ImageStep.Input].ToImage<Bgr, byte>();
+                    if (image2CV.Height != image1CV.Height)
+                    {
+                        image2CV = image2CV.Resize((double)image1CV.Height / (double)image2CV.Height, Inter.Nearest);
+                    }
                     Mat mat2 = image2CV.Mat;
 
                     Mat imageDescriptors2 = new Mat();
                     VectorOfKeyPoint imageKeyPoints2 = new VectorOfKeyPoint();
                     Image2.Bmps[ImageStep.SIFTKeypoints] = CalculateDescriptors(mat2, imageDescriptors2, imageKeyPoints2);
+
 
                     VectorOfVectorOfDMatch matches = new VectorOfVectorOfDMatch();
                     using Emgu.CV.Flann.LinearIndexParams ip = new Emgu.CV.Flann.LinearIndexParams();
@@ -252,8 +278,23 @@ namespace ImageProcessingWPF
                         if (nonZeroCount >= 4)
                         {
                             Mat homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(imageKeyPoints1, imageKeyPoints2, matches, mask, RansacReprojThreshold);
-                            Image2.Bmps[ImageStep.SIFTResult] = homography.ToBitmap();
-
+                            if (homography != null)
+                            {
+                                var array = homography.GetData();
+                                Hom00 = homography.GetValue(0, 0);
+                                Hom01 = homography.GetValue(0, 1);
+                                Hom02 = homography.GetValue(0, 2);
+                                Hom10 = homography.GetValue(1, 0);
+                                Hom11 = homography.GetValue(1, 1);
+                                Hom12 = homography.GetValue(1, 2);
+                                Hom20 = homography.GetValue(2, 0);
+                                Hom21 = homography.GetValue(2, 1);
+                                Hom22 = homography.GetValue(2, 2);
+                            }
+                            else
+                            {
+                                Hom00 = Hom01 = Hom02 = Hom10 = Hom11 = Hom12 = Hom20 = Hom21 = Hom22 = null;
+                            }
 
                             //draw a rectangle along the projected model
                             Rectangle rect = new Rectangle(Point.Empty, mat1.Size);
@@ -268,7 +309,7 @@ namespace ImageProcessingWPF
                             Point[] points = Array.ConvertAll<PointF, Point>(pts, Point.Round);
                             
                             using VectorOfPoint vp = new VectorOfPoint(points);
-                            CvInvoke.Polylines(result, vp, true, new MCvScalar(255, 255, 0, 0), 5);
+                            CvInvoke.Polylines(result, vp, true, new MCvScalar(255, 0, 0, 255), 5);
                         }
                     }
                     Image1.Bmps[ImageStep.SIFTResult] = result.ToBitmap();
