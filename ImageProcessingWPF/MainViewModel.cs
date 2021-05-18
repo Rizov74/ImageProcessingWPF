@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -154,8 +155,8 @@ namespace ImageProcessingWPF
             SIFTCommand = new RelayCommandAsync(async p => await CalcSIFT());
 
             // Default images loading
-            LoadImage1(@"D:\tmp\Images\RightMove_72519906_Redo\0\input.bmp");
-            LoadImage2(@"D:\tmp\Images\RightMove_72519906_Redo\0\0,6572.bmp");
+            LoadImage1(@"..\..\..\ImageToPlay\MemeBatiment\input.bmp");
+            LoadImage2(@"..\..\..\ImageToPlay\MemeBatiment\0,6572.bmp");
 
             RefreshImages();
 
@@ -164,16 +165,22 @@ namespace ImageProcessingWPF
 
         public void LoadImage1(string path)
         {
-            Image1.Bmps[ImageStep.Input] = new Bitmap(path);
-            BitmapTools.UpdateBuffer(ref imageSource1, Image1.Bmps[ImageStep.Input]);
-            OnPropertyChanged(nameof(imageSource1));
+            if (File.Exists(path))
+            {
+                Image1.Bmps[ImageStep.Input] = new Bitmap(path);
+                BitmapTools.UpdateBuffer(ref imageSource1, Image1.Bmps[ImageStep.Input]);
+                OnPropertyChanged(nameof(imageSource1));
+            }
         }
 
         public void LoadImage2(string path)
         {
-            Image2.Bmps[ImageStep.Input] = new Bitmap(path);
-            BitmapTools.UpdateBuffer(ref imageSource2, Image2.Bmps[ImageStep.Input]);
-            OnPropertyChanged(nameof(imageSource2));
+            if (File.Exists(path))
+            {
+                Image2.Bmps[ImageStep.Input] = new Bitmap(path);
+                BitmapTools.UpdateBuffer(ref imageSource2, Image2.Bmps[ImageStep.Input]);
+                OnPropertyChanged(nameof(imageSource2));
+            }
         }
 
 
@@ -201,10 +208,12 @@ namespace ImageProcessingWPF
 
         private void LoadImage1()
         {
+            var dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            dir = Path.Combine(dir, @"ImageToPlay\");
             var d = new OpenFileDialog()
             {
-                Filter = "Bitmap (*.bmp)|*.bmp",
-                InitialDirectory = "D:\\tmp"
+                Filter = "Bitmap (*.bmp)|*.bmp|All files (*.*)|*.*",
+                InitialDirectory = dir
             };
             if (d.ShowDialog() != true)
                 return;
@@ -214,10 +223,12 @@ namespace ImageProcessingWPF
 
         private void LoadImage2()
         {
+            var dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            dir = Path.Combine(dir, @"ImageToPlay\");
             var d = new OpenFileDialog()
             {
-                Filter = "Bitmap (*.bmp)|*.bmp",
-                InitialDirectory = "D:\\tmp"
+                Filter = "Bitmap (*.bmp)|*.bmp|All files (*.*)|*.*",
+                InitialDirectory = dir
             };
             if (d.ShowDialog() != true)
                 return;
