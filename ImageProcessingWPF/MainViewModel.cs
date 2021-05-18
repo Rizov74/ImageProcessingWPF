@@ -1,20 +1,16 @@
 ﻿using Emgu.CV;
-using Emgu.CV.Features2D;
-using Emgu.CV.Util;
-using Emgu.CV.Structure;
-using Emgu.CV.XFeatures2D;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Features2D;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using Microsoft.Win32;
 
 namespace ImageProcessingWPF
 {
@@ -157,6 +153,7 @@ namespace ImageProcessingWPF
             LoadImage2Command = new RelayCommand(p => LoadImage2());
             SIFTCommand = new RelayCommandAsync(async p => await CalcSIFT());
 
+            // Default images loading
             LoadImage1(@"D:\tmp\Images\RightMove_72519906_Redo\0\input.bmp");
             LoadImage2(@"D:\tmp\Images\RightMove_72519906_Redo\0\0,6572.bmp");
 
@@ -236,13 +233,17 @@ namespace ImageProcessingWPF
                 
                 await Task.Run(() =>
                 {
+                    // Extract image 1
                     Image<Bgr, byte> image1CV = Image1.Bmps[ImageStep.Input].ToImage<Bgr, byte>();
                     Mat mat1 = image1CV.Mat;
 
+                    // Calculate keypoints and descriptors
                     Mat imageDescriptors1 = new Mat();
                     VectorOfKeyPoint imageKeyPoints1 = new VectorOfKeyPoint();
                     Image1.Bmps[ImageStep.SIFTKeypoints] = CalculateDescriptors(mat1, imageDescriptors1, imageKeyPoints1);
 
+
+                    // Extract image 2
                     // Set same image height to minimise offset
                     Image<Bgr, byte> image2CV = Image2.Bmps[ImageStep.Input].ToImage<Bgr, byte>();
                     if (image2CV.Height != image1CV.Height)
@@ -251,11 +252,13 @@ namespace ImageProcessingWPF
                     }
                     Mat mat2 = image2CV.Mat;
 
+                    // Calculate keypoints and descriptors
                     Mat imageDescriptors2 = new Mat();
                     VectorOfKeyPoint imageKeyPoints2 = new VectorOfKeyPoint();
                     Image2.Bmps[ImageStep.SIFTKeypoints] = CalculateDescriptors(mat2, imageDescriptors2, imageKeyPoints2);
 
 
+                    // Calculate matches 
                     VectorOfVectorOfDMatch matches = new VectorOfVectorOfDMatch();
                     using Emgu.CV.Flann.LinearIndexParams ip = new Emgu.CV.Flann.LinearIndexParams();
                     using Emgu.CV.Flann.SearchParams sp = new Emgu.CV.Flann.SearchParams();
@@ -263,14 +266,15 @@ namespace ImageProcessingWPF
                     flann.Add(imageDescriptors1);
                     flann.KnnMatch(imageDescriptors2, matches, 2);
 
-                    Image<Bgr, Byte> result = new Image<Bgr, byte>(mat1.Width + mat2.Width, Math.Max(mat1.Height, mat2.Height));
-
-
                     Mat mask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
                     mask.SetTo(new MCvScalar(255));
                     Features2DToolbox.VoteForUniqueness(matches, UniquenessThreshold, mask);
 
+                    // Draw matches
+                    Image<Bgr, byte> result = new Image<Bgr, byte>(mat1.Width + mat2.Width, Math.Max(mat1.Height, mat2.Height));
                     Features2DToolbox.DrawMatches(mat1, imageKeyPoints1, mat2, imageKeyPoints2, matches, result, new MCvScalar(255, 255, 0), new MCvScalar(0, 255, 255), mask);
+
+                    // Calculate homography
                     int nonZeroCount = CvInvoke.CountNonZero(mask);
                     if (nonZeroCount >= 4)
                     {
@@ -290,26 +294,26 @@ namespace ImageProcessingWPF
                                 Hom20 = homography.GetValue(2, 0);
                                 Hom21 = homography.GetValue(2, 1);
                                 Hom22 = homography.GetValue(2, 2);
+
+                                //draw a rectangle along the projected model
+                                Rectangle rect = new Rectangle(Point.Empty, mat1.Size);
+                                PointF[] pts = new PointF[]
+                                {
+                                 new PointF(rect.Left, rect.Bottom),
+                                 new PointF(rect.Right, rect.Bottom),
+                                 new PointF(rect.Right, rect.Top),
+                                 new PointF(rect.Left, rect.Top)
+                                };
+                                pts = CvInvoke.PerspectiveTransform(pts, homography);
+                                Point[] points = Array.ConvertAll<PointF, Point>(pts, Point.Round);
+
+                                using VectorOfPoint vp = new VectorOfPoint(points);
+                                CvInvoke.Polylines(result, vp, true, new MCvScalar(255, 0, 0, 255), 5);
                             }
                             else
                             {
                                 Hom00 = Hom01 = Hom02 = Hom10 = Hom11 = Hom12 = Hom20 = Hom21 = Hom22 = null;
                             }
-
-                            //draw a rectangle along the projected model
-                            Rectangle rect = new Rectangle(Point.Empty, mat1.Size);
-                            PointF[] pts = new PointF[]
-                            {
-                                 new PointF(rect.Left, rect.Bottom),
-                                 new PointF(rect.Right, rect.Bottom),
-                                 new PointF(rect.Right, rect.Top),
-                                 new PointF(rect.Left, rect.Top)
-                            };
-                            pts = CvInvoke.PerspectiveTransform(pts, homography);
-                            Point[] points = Array.ConvertAll<PointF, Point>(pts, Point.Round);
-                            
-                            using VectorOfPoint vp = new VectorOfPoint(points);
-                            CvInvoke.Polylines(result, vp, true, new MCvScalar(255, 0, 0, 255), 5);
                         }
                     }
                     Image1.Bmps[ImageStep.SIFTResult] = result.ToBitmap();
