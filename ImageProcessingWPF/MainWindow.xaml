@@ -11,6 +11,8 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="30" />
+            <ColumnDefinition Width="30" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -55,6 +57,46 @@
                      Height="25"
                      Text="{Binding RansacReprojThreshold}"/>
             </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock Text="NndrRatio"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding NndrRatio}"/>
+            </UniformGrid>
+
+            <CheckBox Content="Use Mask"
+                      x:Name="cbMask" 
+                      IsChecked="{Binding ShowSiftMask}"/>
+            <UniformGrid Rows="2" Columns="4">
+                <TextBlock Text="X" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding SiftMaskX}"/>
+
+                <TextBlock Text="Y" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding SiftMaskY}"/>
+
+                <TextBlock Text="Width" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding SiftMaskWidth}"/>
+
+                <TextBlock Text="Height" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding SiftMaskHeight}"/>
+            </UniformGrid>
 
             <Label Height="40"/>
             <Label Content="Homotetie :"/>
@@ -74,10 +116,22 @@
                 <TextBlock Text="{Binding Hom21, StringFormat=f3}"/>
                 <TextBlock Text="{Binding Hom22, StringFormat=f3}"/>
             </UniformGrid>
+            <UniformGrid Columns="2">
+                <Label Content="Min distance :"/>
+                <Label Content="{Binding SiftMinDistance}" />
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <Label Content="Max distance :"/>
+                <Label Content="{Binding SiftMaxDistance}" />
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <Label Content="Ratio good matches :"/>
+                <Label Content="{Binding SiftGoodResultRatio}" />
+            </UniformGrid>
 
         </StackPanel>
 
-        <Border Grid.Row="0" Grid.Column="1" 
+        <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
@@ -91,7 +145,7 @@
                 Command="{Binding LoadImage1Command}"/>
 
 
-        <Border Grid.Row="0" Grid.Column="2" 
+        <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" 
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
@@ -100,42 +154,58 @@
                    AllowDrop="true"
                    Drop="Image2_Drop" />
         </Border>
-        <Button Grid.Row="1" Grid.Column="2"
+        <Button Grid.Row="1" Grid.Column="4"
                 Content="Load"
                 Command="{Binding LoadImage2Command}"/>
 
-        
-        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+        <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" 
+                Content="Swap"
+                Command="{Binding SwapImageCommand}"/>
+
+        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4"
                   x:Name="cbImageStep"
                   VerticalAlignment="Top"
                   SelectedValue="{Binding CurImageStep}"/>
 
 
 
-        <Border Grid.Row="23" Grid.Column="2" 
-                BorderThickness="1"
-                Background="Gray"
-                BorderBrush="Brown">
-            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
-               Source="{Binding ImageResult2}" />
-        </Border>
+        
 
-        <Border Grid.Row="3" Grid.Column="1"
+        <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="2"
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Style.Triggers >
-                        <DataTrigger Binding="{Binding CurImageStep}" Value="SIFTResult">
-                            <Setter Property="Grid.ColumnSpan" Value="2" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
-            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+                <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+               Source="{Binding ImageResult2}" />
+            </Border>
+
+            <Border Grid.Column="0"
+                BorderThickness="1"
+                Background="Gray"
+                BorderBrush="Brown">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurImageStep}" Value="{x:Static local:ImageStep.SIFTResult}">
+                                <Setter Property="Grid.ColumnSpan" Value="2" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding CurImageStep}" Value="{x:Static local:ImageStep.SIFTGoodResult}">
+                                <Setter Property="Grid.ColumnSpan" Value="2" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <local:ImageViewer Grid.Row="1" Grid.Column="1" 
                Source="{Binding ImageResult1}" />
-        </Border>
+            </Border>
+        </Grid>
+        
         
     </Grid>
 </Window>
