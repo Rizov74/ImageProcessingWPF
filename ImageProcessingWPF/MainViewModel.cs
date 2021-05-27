@@ -103,35 +103,21 @@ namespace ImageProcessingWPF
             }
         }
 
-        public int SiftMaskX
+        public float SiftMaskRatioBorder
         {
-            get => siftMaskX; set
+            get => siftMaskRatioBorder; 
+            set
             {
-                SetValue(ref siftMaskX, value);
+                SetValue(ref siftMaskRatioBorder, value);
                 RefreshSiftMask();
             }
         }
-        public int SiftMaskY
+        public float SiftMaskRatioCenter
         {
-            get => siftMaskY; set
+            get => siftMaskRatioCenter; 
+            set
             {
-                SetValue(ref siftMaskY, value);
-                RefreshSiftMask();
-            }
-        }
-        public int SiftMaskWidth
-        {
-            get => siftMaskWidth; set
-            {
-                SetValue(ref siftMaskWidth, value);
-                RefreshSiftMask();
-            }
-        }
-        public int SiftMaskHeight
-        {
-            get => siftMaskHeight; set
-            {
-                SetValue(ref siftMaskHeight, value);
+                SetValue(ref siftMaskRatioCenter, value);
                 RefreshSiftMask();
             }
         }
@@ -149,7 +135,6 @@ namespace ImageProcessingWPF
         public double ScaleIncrement { get => scaleIncrement; set => SetValue(ref scaleIncrement, value); }
         public int RotationBins { get => rotationBins; set => SetValue(ref rotationBins, value); }
         public double RansacReprojThreshold { get => ransacReprojThreshold; set => SetValue(ref ransacReprojThreshold, value); }
-        public float NndrRatio { get => nndrRatio; set => SetValue(ref nndrRatio, value); }
 
         public double? Hom22 { get => hom22; set => SetValue(ref hom22, value); }
         public double? Hom21 { get => hom21; set => SetValue(ref hom21, value); }
@@ -163,7 +148,9 @@ namespace ImageProcessingWPF
         public float? SiftGoodResultRatio { get => siftGoodResultRatio; set => SetValue(ref siftGoodResultRatio, value); }
         public float? SiftMinDistance { get => siftMinDistance; set => SetValue(ref siftMinDistance, value); }
         public float? SiftMaxDistance { get => siftMaxDistance; set => SetValue(ref siftMaxDistance, value); }
-
+        public int SiftMatchCnt { get => siftMatchCnt; set => SetValue(ref siftMatchCnt, value); }
+        public float? SiftRMSE { get => siftRMSE; set => SetValue(ref siftRMSE, value); }
+        public int? SiftGoodResultCnt { get => siftGoodResultCnt; set => SetValue(ref siftGoodResultCnt, value); }
 
         // Work data
         private readonly ImageWork Image1 = new ImageWork();
@@ -180,16 +167,14 @@ namespace ImageProcessingWPF
         private WriteableBitmap imageResult2;
 
         // SIFT Params
-        private int siftMaskX;
-        private int siftMaskY;
-        private int siftMaskWidth = 100;
-        private int siftMaskHeight = 100;
+        private float siftMaskRatioBorder = 0.125f; // 1/8
+        private float siftMaskRatioCenter = 0.75f; // 6/8
         private bool showSiftMask;
         private double uniquenessThreshold = 0.80;
         private double scaleIncrement = 1.5;
         private int rotationBins = 2;
         private double ransacReprojThreshold = 2;
-        private float nndrRatio = 0.7f;
+        private int siftMatchCnt = 2;
 
         // SIFT Results
         private double? hom00;
@@ -203,7 +188,9 @@ namespace ImageProcessingWPF
         private double? hom22;
         private float? siftMinDistance;
         private float? siftMaxDistance;
+        private int? siftGoodResultCnt;
         private float? siftGoodResultRatio;
+        private float? siftRMSE;
 
         public MainViewModel()
         {
@@ -308,16 +295,6 @@ namespace ImageProcessingWPF
         {
             Image1.Bmps[ImageStep.Input] = bmp;
 
-            siftMaskX = bmp.Width / 4;
-            siftMaskY = bmp.Height / 4;
-            siftMaskWidth = bmp.Width / 2;
-            siftMaskHeight = bmp.Height / 2;
-            OnPropertyChanged(nameof(SiftMaskX));
-            OnPropertyChanged(nameof(SiftMaskY));
-            OnPropertyChanged(nameof(SiftMaskWidth));
-            OnPropertyChanged(nameof(SiftMaskHeight));
-
-
             if (ShowSiftMask)
                 RefreshSiftMask();
             else
@@ -330,34 +307,52 @@ namespace ImageProcessingWPF
         private void SetImageSource2(Bitmap bmp)
         {
             Image2.Bmps[ImageStep.Input] = bmp;
-            BitmapTools.UpdateBuffer(ref imageSource2, Image2.Bmps[ImageStep.Input]);
-            OnPropertyChanged(nameof(ImageSource2));
+            if (ShowSiftMask)
+                RefreshSiftMask();
+            else
+            {
+                BitmapTools.UpdateBuffer(ref imageSource2, Image2.Bmps[ImageStep.Input]);
+                OnPropertyChanged(nameof(ImageSource2));
+            }
         }
 
         private void RefreshSiftMask()
         {
             BitmapTools.UpdateBuffer(ref imageSource1, Image1.Bmps[ImageStep.Input]);
             if (ShowSiftMask)
-                DisplaySiftMask();
+                DisplaySiftMask(imageSource1);
+
+            BitmapTools.UpdateBuffer(ref imageSource2, Image2.Bmps[ImageStep.Input]);
+            if (ShowSiftMask)
+                DisplaySiftMask(imageSource2);
+
             OnPropertyChanged(nameof(ImageSource1));
+            OnPropertyChanged(nameof(ImageSource2));
         }
 
-        private unsafe void DisplaySiftMask()
+        private unsafe void DisplaySiftMask(WriteableBitmap imageSource)
         {
-            imageSource1.Lock();
-            byte* pResStart = (byte*)imageSource1.BackBuffer;
+            imageSource.Lock();
 
-            int maskXStart = Math.Max(0, SiftMaskX);
-            int maskYStart = Math.Max(0, SiftMaskY);
-            int maskXEnd = Math.Min(SiftMaskX + SiftMaskWidth, imageSource1.PixelWidth);
-            int maskYEnd = Math.Min(SiftMaskY + SiftMaskHeight, imageSource1.PixelHeight);
-            int bpp = imageSource1.Format.BitsPerPixel / 8;
+
+
+            byte* pResStart = (byte*)imageSource.BackBuffer;
+
+            int maskX = (int)(imageSource.PixelWidth * SiftMaskRatioBorder);
+            int maskWidth = (int)(imageSource.PixelWidth * SiftMaskRatioCenter);
+            int maskY = (int)(imageSource.PixelHeight * SiftMaskRatioBorder);
+            int maskHeight = (int)(imageSource.PixelHeight * SiftMaskRatioCenter);
+            int maskXStart = Math.Max(0, maskX);
+            int maskYStart = Math.Max(0, maskY);
+            int maskXEnd = Math.Min(maskX + maskWidth, imageSource.PixelWidth);
+            int maskYEnd = Math.Min(maskY + maskHeight, imageSource.PixelHeight);
+            int bpp = imageSource.Format.BitsPerPixel / 8;
 
 
             for (int j = 0; j < maskYStart; j++)
             {
-                byte* pRow = pResStart + j * imageSource1.PixelWidth * bpp;
-                for (int i = 0; i < imageSource1.PixelWidth; i++)
+                byte* pRow = pResStart + j * imageSource.PixelWidth * bpp;
+                for (int i = 0; i < imageSource.PixelWidth; i++)
                 {
                     byte* p = pRow + i * bpp;
                     for (int u = 0; u < bpp; u++)
@@ -369,7 +364,7 @@ namespace ImageProcessingWPF
 
             for (int j = maskYStart; j < maskYEnd; j++)
             {
-                byte* pRow = pResStart + j * imageSource1.PixelWidth * bpp;
+                byte* pRow = pResStart + j * imageSource.PixelWidth * bpp;
                 for (int i = 0; i < maskXStart; i++)
                 {
                     byte* p = pRow + i * bpp;
@@ -387,7 +382,7 @@ namespace ImageProcessingWPF
                 //        *(p + u) = 0;
                 //    }
                 //}
-                for (int i = maskXEnd; i < imageSource1.PixelWidth; i++)
+                for (int i = maskXEnd; i < imageSource.PixelWidth; i++)
                 {
                     byte* p = pRow + i * bpp;
                     for (int u = 0; u < bpp; u++)
@@ -398,10 +393,10 @@ namespace ImageProcessingWPF
             }
 
 
-            for (int j = maskYEnd; j < imageSource1.PixelHeight; j++)
+            for (int j = maskYEnd; j < imageSource.PixelHeight; j++)
             {
-                byte* pRow = pResStart + j * imageSource1.PixelWidth * bpp;
-                for (int i = 0; i < imageSource1.PixelWidth; i++)
+                byte* pRow = pResStart + j * imageSource.PixelWidth * bpp;
+                for (int i = 0; i < imageSource.PixelWidth; i++)
                 {
                     byte* p = pRow + i * bpp;
                     for (int u = 0; u < bpp; u++)
@@ -410,7 +405,7 @@ namespace ImageProcessingWPF
                     }
                 }
             }
-            imageSource1.Unlock();
+            imageSource.Unlock();
         }
 
 
@@ -420,9 +415,9 @@ namespace ImageProcessingWPF
             try
             {
                 IsAlive = false;
-                SiftGoodResultRatio = SiftMinDistance = SiftMaxDistance = 0;
-                Hom00 = Hom01 = Hom02 = Hom10 = Hom11 = Hom12 = Hom20 = Hom21 = Hom22 = 0;
-
+                SiftRMSE = SiftGoodResultRatio = SiftMinDistance = SiftMaxDistance = null;
+                SiftGoodResultCnt = null;
+                Hom00 = Hom01 = Hom02 = Hom10 = Hom11 = Hom12 = Hom20 = Hom21 = Hom22 = null;
 
                 await Task.Run(() =>
                 {
@@ -458,26 +453,48 @@ namespace ImageProcessingWPF
                     using Emgu.CV.Flann.SearchParams sp = new Emgu.CV.Flann.SearchParams();
                     using FlannBasedMatcher flann = new FlannBasedMatcher(ip, sp);
                     flann.Add(imageDescriptors1);
-                    flann.KnnMatch(imageDescriptors2, matches, 2);
-                    
+                    flann.KnnMatch(imageDescriptors2, matches, SiftMatchCnt);
+
+                    // Draw matches
+                    Image<Bgr, byte> result = new Image<Bgr, byte>(mat1.Width + mat2.Width, Math.Max(mat1.Height, mat2.Height));
+                    Features2DToolbox.DrawMatches(mat1, imageKeyPoints1, mat2, imageKeyPoints2, matches, result, new MCvScalar(255, 255, 0), new MCvScalar(0, 255, 255), null);
+
+                    // get good matches
                     Mat mask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
                     mask.SetTo(new MCvScalar(255));
                     Features2DToolbox.VoteForUniqueness(matches, UniquenessThreshold, mask);
 
-                    // Draw matches
-                    Image<Bgr, byte> result = new Image<Bgr, byte>(mat1.Width + mat2.Width, Math.Max(mat1.Height, mat2.Height));
-                    Features2DToolbox.DrawMatches(mat1, imageKeyPoints1, mat2, imageKeyPoints2, matches, result, new MCvScalar(255, 255, 0), new MCvScalar(0, 255, 255), mask);
+                    SiftMinDistance = float.MaxValue;
+                    SiftMaxDistance = float.MinValue;
+                    for (int i = 0; i < matches.Size; i++)
+                    {
+                        if (matches[i].Size < 2)
+                            continue;
+
+                        MDMatch m1 = matches[i][0];
+
+                        if (m1.Distance < SiftMinDistance) SiftMinDistance = m1.Distance;
+                        if (m1.Distance > SiftMaxDistance) SiftMaxDistance = m1.Distance;
+                    }
+
+                    // draw good results
+                    Image<Bgr, byte> goodresult = new Image<Bgr, byte>(mat1.Width + mat2.Width, Math.Max(mat1.Height, mat2.Height));
+                    Features2DToolbox.DrawMatches(mat1, imageKeyPoints1, mat2, imageKeyPoints2, matches, goodresult, new MCvScalar(255, 0, 0), new MCvScalar(255, 255, 255), mask);
+                    
 
                     // Calculate homography
                     int nonZeroCount = CvInvoke.CountNonZero(mask);
                     if (nonZeroCount >= 4)
                     {
                         nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(imageKeyPoints1, imageKeyPoints2, matches, mask, ScaleIncrement, RotationBins);
+                        SiftGoodResultCnt = nonZeroCount;
                         if (nonZeroCount >= 4)
                         {
                             Mat homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(imageKeyPoints1, imageKeyPoints2, matches, mask, RansacReprojThreshold);
                             if (homography != null)
                             {
+                                SiftGoodResultRatio = (float)CvInvoke.CountNonZero(mask) / (float)matches.Size;
+
                                 var array = homography.GetData();
                                 Hom00 = homography.GetValue(0, 0);
                                 Hom01 = homography.GetValue(0, 1);
@@ -489,45 +506,53 @@ namespace ImageProcessingWPF
                                 Hom21 = homography.GetValue(2, 1);
                                 Hom22 = homography.GetValue(2, 2);
 
+
+                                // ***** calcul RMSE
+                                // store points
+                                PointF[] ptsMatches = new PointF[matches.Size];
+                                PointF[] ptsReals = new PointF[matches.Size];
+                                for (int i = 0; i < matches.Size; i++)
+                                {
+                                    if (mask.GetValue(i, 0) == (byte)0) continue;
+
+                                    ptsMatches[i] = imageKeyPoints1[matches[i][0].TrainIdx].Point;
+                                    ptsReals[i] = imageKeyPoints2[matches[i][0].QueryIdx].Point;
+                                }
+                                // transform points image1
+                                ptsMatches = CvInvoke.PerspectiveTransform(ptsMatches, homography);
+
+                                // calculate distance
+                                double sumDist = 0;
+                                int cntDist = 0;
+                                for (int i = 0; i < matches.Size; i++)
+                                {
+                                    if (mask.GetValue(i, 0) == (byte)0) continue;
+
+                                    var pt1 = ptsMatches[i];
+                                    var pt2 = ptsReals[i];
+                                    sumDist += (pt1.X - pt2.X) * (pt1.X - pt2.X) + (pt1.Y - pt2.Y) * (pt1.Y - pt2.Y);
+                                    cntDist++;
+                                }
+                                if (cntDist != 0)
+                                    SiftRMSE = (float)(sumDist / (float)cntDist);
+
+
                                 //draw a rectangle along the projected model
                                 Rectangle rect = new Rectangle(Point.Empty, mat1.Size);
-                                PointF[] pts = new PointF[]
+                                PointF[] ptsRect = new PointF[]
                                 {
                                  new PointF(rect.Left, rect.Bottom),
                                  new PointF(rect.Right, rect.Bottom),
                                  new PointF(rect.Right, rect.Top),
                                  new PointF(rect.Left, rect.Top)
                                 };
-                                pts = CvInvoke.PerspectiveTransform(pts, homography);
-                                Point[] points = Array.ConvertAll<PointF, Point>(pts, Point.Round);
-
-                                using VectorOfPoint vp = new VectorOfPoint(points);
-                                CvInvoke.Polylines(result, vp, true, new MCvScalar(255, 0, 0, 255), 5);
-
-
-                                // get good matches
-                                SiftMinDistance = float.MaxValue;
-                                SiftMaxDistance = float.MinValue;
-                                VectorOfVectorOfDMatch goodMatches = new VectorOfVectorOfDMatch();
-                                for (int i = 0; i < matches.Size; i++)
+                                ptsRect = CvInvoke.PerspectiveTransform(ptsRect, homography);
+                                Point[] points = Array.ConvertAll<PointF, Point>(ptsRect, Point.Round);
+                                using (VectorOfPoint vp = new VectorOfPoint(points))
                                 {
-                                    if (matches[i].Size < 2)
-                                        continue;
-
-                                    MDMatch m1 = matches[i][0];
-                                    MDMatch m2 = matches[i][1];
-
-                                    if (m1.Distance < SiftMinDistance) SiftMinDistance = m1.Distance;
-                                    if (m1.Distance > SiftMaxDistance) SiftMaxDistance = m1.Distance;
-
-                                    if (m1.Distance <= NndrRatio * m2.Distance)
-                                        goodMatches.Push(matches[i]);
+                                    CvInvoke.Polylines(goodresult, vp, true, new MCvScalar(255, 0, 0, 255), 5);
                                 }
-                                Image<Bgr, byte> goodresult = new Image<Bgr, byte>(mat1.Width + mat2.Width, Math.Max(mat1.Height, mat2.Height));
-                                Features2DToolbox.DrawMatches(mat1, imageKeyPoints1, mat2, imageKeyPoints2, goodMatches, goodresult, new MCvScalar(255, 0, 0), new MCvScalar(255, 255, 255), null);
-                                Image1.Bmps[ImageStep.SIFTGoodResult] = goodresult.ToBitmap();
 
-                                SiftGoodResultRatio = (float)goodMatches.Size / (float)matches.Size;
                             }
                             else
                             {
@@ -535,7 +560,9 @@ namespace ImageProcessingWPF
                             }
                         }
                     }
+
                     Image1.Bmps[ImageStep.SIFTResult] = result.ToBitmap();
+                    Image1.Bmps[ImageStep.SIFTGoodResult] = goodresult.ToBitmap();
 
                     RefreshImages();
                     //CurImageStep = ImageStep.SIFTResult;
@@ -551,18 +578,22 @@ namespace ImageProcessingWPF
             }
         }
 
-        private Mat CreateSiftInputMask(Mat mat1)
+        private Mat CreateSiftInputMask(Mat mat)
         {
             // create mask for input 1
-            Mat input1Mask = new Mat(mat1.Size, DepthType.Cv8U, 1);
+            Mat input1Mask = new Mat(mat.Size, DepthType.Cv8U, 1);
             unsafe
             {
                 byte* pResStart = (byte*)input1Mask.DataPointer;
+                int maskX = (int)(mat.Width * SiftMaskRatioBorder);
+                int maskWidth = (int)(mat.Width * SiftMaskRatioCenter);
+                int maskY = (int)(mat.Height * SiftMaskRatioBorder);
+                int maskHeight = (int)(mat.Height * SiftMaskRatioCenter);
 
-                int maskXStart = Math.Max(0, SiftMaskX);
-                int maskYStart = Math.Max(0, SiftMaskY);
-                int maskXEnd = Math.Min(SiftMaskX + SiftMaskWidth, input1Mask.Width);
-                int maskYEnd = Math.Min(SiftMaskY + SiftMaskHeight, input1Mask.Height);
+                int maskXStart = Math.Max(0, maskX);
+                int maskYStart = Math.Max(0, maskY);
+                int maskXEnd = Math.Min(maskX + maskWidth, input1Mask.Width);
+                int maskYEnd = Math.Min(maskY + maskHeight, input1Mask.Height);
                 int bpp = input1Mask.NumberOfChannels;
                 for (int j = maskYStart; j < maskYEnd; j++)
                 {

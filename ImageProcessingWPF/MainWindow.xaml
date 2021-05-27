@@ -30,13 +30,6 @@
                      Height="25"
                     Content="SIFT" />
             <UniformGrid Columns="2">
-                <TextBlock Text="Uniqueness Threshold"
-                           VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
-                     Height="25"
-                     Text="{Binding UniquenessThreshold}"/>
-            </UniformGrid>
-            <UniformGrid Columns="2">
                 <TextBlock Text="Scale Increment"
                            VerticalAlignment="Center"/>
                 <TextBox HorizontalAlignment="Stretch"
@@ -51,51 +44,45 @@
                      Text="{Binding RotationBins}"/>
             </UniformGrid>
             <UniformGrid Columns="2">
+                <TextBlock Text="Match count"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding SiftMatchCnt}"/>
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <TextBlock Text="Uniqueness Threshold"
+                           VerticalAlignment="Center"/>
+                <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding UniquenessThreshold}"/>
+            </UniformGrid>
+            <UniformGrid Columns="2">
                 <TextBlock Text="Ransac Reproj Threshold"
                            VerticalAlignment="Center"/>
                 <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding RansacReprojThreshold}"/>
             </UniformGrid>
-            <UniformGrid Columns="2">
-                <TextBlock Text="NndrRatio"
-                           VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
-                     Height="25"
-                     Text="{Binding NndrRatio}"/>
-            </UniformGrid>
 
             <CheckBox Content="Use Mask"
                       x:Name="cbMask" 
                       IsChecked="{Binding ShowSiftMask}"/>
-            <UniformGrid Rows="2" Columns="4">
-                <TextBlock Text="X" 
+            <UniformGrid Columns="4">
+                <TextBlock Text="Border ratio" 
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
                 <TextBox HorizontalAlignment="Stretch"
                      Height="25"
-                     Text="{Binding SiftMaskX}"/>
+                     Text="{Binding SiftMaskRatioBorder}"/>
 
-                <TextBlock Text="Y" 
+                <TextBlock Text="Center ratio" 
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
                 <TextBox HorizontalAlignment="Stretch"
                      Height="25"
-                     Text="{Binding SiftMaskY}"/>
+                     Text="{Binding SiftMaskRatioCenter}"/>
 
-                <TextBlock Text="Width" 
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
-                     Height="25"
-                     Text="{Binding SiftMaskWidth}"/>
-
-                <TextBlock Text="Height" 
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
-                     Height="25"
-                     Text="{Binding SiftMaskHeight}"/>
             </UniformGrid>
 
             <Label Height="40"/>
@@ -125,8 +112,16 @@
                 <Label Content="{Binding SiftMaxDistance}" />
             </UniformGrid>
             <UniformGrid Columns="2">
+                <Label Content="Good matches :"/>
+                <Label Content="{Binding SiftGoodResultCnt}" />
+            </UniformGrid>
+            <UniformGrid Columns="2">
                 <Label Content="Ratio good matches :"/>
                 <Label Content="{Binding SiftGoodResultRatio}" />
+            </UniformGrid>
+            <UniformGrid Columns="2">
+                <Label Content="RMSE :"/>
+                <Label Content="{Binding SiftRMSE}" FontWeight="Bold" />
             </UniformGrid>
 
         </StackPanel>
