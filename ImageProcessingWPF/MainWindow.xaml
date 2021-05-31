@@ -10,10 +10,12 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="150" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="30" />
             <ColumnDefinition Width="30" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="150" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -126,21 +128,34 @@
 
         </StackPanel>
 
-        <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+        <ListView Grid.Row="0" Grid.Column="1"
+                  ItemsSource="{Binding ImageSet1}"
+                  SelectedItem="{Binding SelectedImage1}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <local:ImageViewer Source="{Binding .}" 
+                                       Width="120"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Button Grid.Row="1" Grid.Column="1"
+                Content="Load folder"
+                Command="{Binding LoadImageSet1Command}"/>
+
+        <Border Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
-            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
-               Source="{Binding ImageSource1}" 
+            <local:ImageViewer Source="{Binding ImageSource1}" 
                    AllowDrop="true"
                    Drop="Image1_Drop"/>
         </Border>
-        <Button Grid.Row="1" Grid.Column="1"
+        <Button Grid.Row="1" Grid.Column="2"
                 Content="Load"
                 Command="{Binding LoadImage1Command}"/>
 
 
-        <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" 
+        <Border Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" 
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
@@ -149,15 +164,32 @@
                    AllowDrop="true"
                    Drop="Image2_Drop" />
         </Border>
-        <Button Grid.Row="1" Grid.Column="4"
+        <Button Grid.Row="1" Grid.Column="5"
                 Content="Load"
                 Command="{Binding LoadImage2Command}"/>
 
-        <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" 
+
+        <ListView Grid.Row="0" Grid.Column="6"
+                  ItemsSource="{Binding ImageSet2}"
+                  SelectedItem="{Binding SelectedImage2}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <local:ImageViewer Source="{Binding .}" 
+                                       Width="120"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Button Grid.Row="1" Grid.Column="6"
+                Content="Load folder"
+                Command="{Binding LoadImageSet2Command}"/>
+
+        <Button Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" 
                 Content="Swap"
                 Command="{Binding SwapImageCommand}"/>
 
-        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4"
+        
+        
+        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="6"
                   x:Name="cbImageStep"
                   VerticalAlignment="Top"
                   SelectedValue="{Binding CurImageStep}"/>
@@ -166,7 +198,7 @@
 
         
 
-        <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4">
+        <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />

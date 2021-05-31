@@ -6,12 +6,15 @@ using Emgu.CV.Util;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace ImageProcessingWPF
 {
@@ -85,8 +88,31 @@ namespace ImageProcessingWPF
         public ICommand LoadImage2Command { get; }
         public ICommand SIFTCommand { get; }
         public ICommand SwapImageCommand { get; }
+        public ICommand LoadImageSet1Command { get; }
+        public ICommand LoadImageSet2Command { get; }
 
         public bool IsAlive { get => isAlive; set => SetValue(ref isAlive, value); }
+
+        public ObservableCollection<string> ImageSet1 { get; } = new ObservableCollection<string>();
+        public ObservableCollection<string> ImageSet2 { get; } = new ObservableCollection<string>();
+        public string SelectedImage1
+        {
+            get => selectedImage1;
+            set
+            {
+                if (SetValue(ref selectedImage1, value) && SelectedImage1 != null)
+                    LoadImage1(SelectedImage1);
+            }
+        }
+        public string SelectedImage2
+        {
+            get => selectedImage2;
+            set
+            {
+                if (SetValue(ref selectedImage2, value) && SelectedImage2 != null)
+                    LoadImage2(SelectedImage2);
+            }
+        }
 
         public WriteableBitmap ImageSource1 { get => imageSource1; protected set => SetValue(ref imageSource1, value); }
         public WriteableBitmap ImageSource2 { get => imageSource2; protected set => SetValue(ref imageSource2, value); }
@@ -153,6 +179,8 @@ namespace ImageProcessingWPF
         public int? SiftGoodResultCnt { get => siftGoodResultCnt; set => SetValue(ref siftGoodResultCnt, value); }
 
         // Work data
+        private string selectedImage1;
+        private string selectedImage2;
         private readonly ImageWork Image1 = new ImageWork();
         private readonly ImageWork Image2 = new ImageWork();
 
@@ -198,6 +226,8 @@ namespace ImageProcessingWPF
             LoadImage2Command = new RelayCommand(p => LoadImage2());
             SIFTCommand = new RelayCommandAsync(async p => await CalcSIFT());
             SwapImageCommand = new RelayCommand(p => SwapImages());
+            LoadImageSet1Command = new RelayCommand(p => LoadImageSet1());
+            LoadImageSet2Command = new RelayCommand(p => LoadImageSet2());
 
             // Default images loading
             LoadImage1(@"..\..\..\ImageToPlay\AngleDifferent2\0,7974.bmp");
@@ -273,6 +303,64 @@ namespace ImageProcessingWPF
                 return;
 
             LoadImage2(d.FileName);
+        }
+
+        private void LoadImageSet1()
+        {
+            var dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            dir = Path.Combine(dir, @"ImageToPlay\");
+            var d = new FolderBrowserDialog()
+            {
+                ShowNewFolderButton = false,
+                Description = "Select image directory for left",
+                RootFolder = Environment.SpecialFolder.ApplicationData
+            };
+            if (d.ShowDialog() != DialogResult.OK)
+                return;
+
+            ImageSet1.Clear();
+            SelectedImage1 = null;
+
+            foreach (var p in Directory.GetFiles(d.SelectedPath, "*.bmp"))
+                ImageSet1.Add(p);
+
+            foreach (var p in Directory.GetFiles(d.SelectedPath, "*.jpg"))
+                ImageSet1.Add(p);
+
+            foreach (var p in Directory.GetFiles(d.SelectedPath, "*.jpeg"))
+                ImageSet1.Add(p);
+
+            if (ImageSet1.Count != 0)
+                SelectedImage1 = ImageSet1[0];
+        }
+
+        private void LoadImageSet2()
+        {
+            var dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            dir = Path.Combine(dir, @"ImageToPlay\");
+            var d = new FolderBrowserDialog()
+            {
+                ShowNewFolderButton = false,
+                Description = "Select image directory for left",
+                RootFolder = Environment.SpecialFolder.ApplicationData
+            };
+            if (d.ShowDialog() != DialogResult.OK)
+                return;
+
+            ImageSet2.Clear();
+            SelectedImage2 = null;
+
+            foreach (var p in Directory.GetFiles(d.SelectedPath, "*.bmp"))
+                ImageSet2.Add(p);
+
+            foreach (var p in Directory.GetFiles(d.SelectedPath, "*.jpg"))
+                ImageSet2.Add(p);
+
+            foreach (var p in Directory.GetFiles(d.SelectedPath, "*.jpeg"))
+                ImageSet2.Add(p);
+
+            if (ImageSet2.Count != 0)
+                SelectedImage2 = ImageSet2[0];
         }
 
         private void SwapImages()
