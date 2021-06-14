@@ -3,22 +3,22 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Features2D;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
-using Microsoft.Win32;
+using ImageProcessingWPF.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
-namespace ImageProcessingWPF
+namespace ImageProcessingWPF.ViewModels
 {
     public enum ImageStep
     {
@@ -78,13 +78,14 @@ namespace ImageProcessingWPF
         public ImageSet(string path)
         {
             Path = path;
-            
 
-        
+
+
         }
     }
 
-    public class MainViewModel : ObservableObject
+
+    public class ImageComparatorViewModel : ObservableObject
     {
         // Commands
         public ICommand LoadImage1Command { get; }
@@ -263,7 +264,7 @@ namespace ImageProcessingWPF
         public double CoeffHistoChromG { get => coeffHistoChromG; set => SetValue(ref coeffHistoChromG, value); }
         public double CoeffHistoMean { get => coeffHistoMean; set => SetValue(ref coeffHistoMean, value); }
 
-        public MainViewModel()
+        public ImageComparatorViewModel()
         {
             LoadImage1Command = new RelayCommand(p => LoadImage1());
             LoadImage2Command = new RelayCommand(p => LoadImage2());
@@ -612,7 +613,7 @@ namespace ImageProcessingWPF
                     // draw good results
                     Image<Bgr, byte> goodresult = new Image<Bgr, byte>(mat1.Width + mat2.Width, Math.Max(mat1.Height, mat2.Height));
                     Features2DToolbox.DrawMatches(mat1, imageKeyPoints1, mat2, imageKeyPoints2, matches, goodresult, new MCvScalar(255, 0, 0), new MCvScalar(255, 255, 255), mask);
-                    
+
 
                     // Calculate homography
                     int nonZeroCount = CvInvoke.CountNonZero(mask);

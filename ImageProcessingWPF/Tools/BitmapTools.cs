@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
-namespace ImageProcessingWPF
+namespace ImageProcessingWPF.Tools
 {
     public static class BitmapTools
     {

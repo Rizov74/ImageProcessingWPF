@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ImageProcessingWPF
+namespace ImageProcessingWPF.Tools
 {
     public static class MatExtension
     {

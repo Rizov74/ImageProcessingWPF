@@ -1,12 +1,13 @@
-﻿<Window x:Class="ImageProcessingWPF.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ImageProcessingWPF" 
-        d:DataContext="{d:DesignInstance Type=local:MainViewModel}"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1600">
+﻿<UserControl x:Class="ImageProcessingWPF.Views.ImageComparator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:ImageProcessingWPF.Views"
+             xmlns:vm="clr-namespace:ImageProcessingWPF.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300" />
@@ -29,99 +30,99 @@
                     IsEnabled="{Binding IsAlive}">
             <StackPanel Orientation="Vertical"
                         Background="gray">
-            <Button Command="{Binding SIFTCommand}"
+                <Button Command="{Binding SIFTCommand}"
                      Height="25"
                     Content="SIFT" />
-            <UniformGrid Columns="2">
-                <TextBlock Text="Scale Increment"
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Scale Increment"
                            VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
+                    <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding ScaleIncrement}"/>
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <TextBlock Text="Rotation Bins"
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Rotation Bins"
                            VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
+                    <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding RotationBins}"/>
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <TextBlock Text="Match count"
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Match count"
                            VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
+                    <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding SiftMatchCnt}"/>
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <TextBlock Text="Uniqueness Threshold"
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Uniqueness Threshold"
                            VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
+                    <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding UniquenessThreshold}"/>
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <TextBlock Text="Ransac Reproj Threshold"
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Ransac Reproj Threshold"
                            VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
+                    <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding RansacReprojThreshold}"/>
-            </UniformGrid>
+                </UniformGrid>
 
-            <CheckBox Content="Use Mask"
+                <CheckBox Content="Use Mask"
                       x:Name="cbMask" 
                       IsChecked="{Binding ShowSiftMask}"/>
-            <UniformGrid Columns="4">
-                <TextBlock Text="Border ratio" 
+                <UniformGrid Columns="4">
+                    <TextBlock Text="Border ratio" 
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
+                    <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding SiftMaskRatioBorder}"/>
 
-                <TextBlock Text="Center ratio" 
+                    <TextBlock Text="Center ratio" 
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
-                <TextBox HorizontalAlignment="Stretch"
+                    <TextBox HorizontalAlignment="Stretch"
                      Height="25"
                      Text="{Binding SiftMaskRatioCenter}"/>
 
-            </UniformGrid>
+                </UniformGrid>
 
-            <Label Height="40"/>
-            <Label Content="Homotetie :"/>
-            <UniformGrid Rows="3" Columns="3">
-                <UniformGrid.Resources>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="TextAlignment" Value="Center"/>
-                    </Style>
-                </UniformGrid.Resources>
-                <TextBlock Text="{Binding Hom00, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom01, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom02, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom10, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom11, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom12, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom20, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom21, StringFormat=f3}"/>
-                <TextBlock Text="{Binding Hom22, StringFormat=f3}"/>
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <Label Content="Min distance :"/>
-                <Label Content="{Binding SiftMinDistance}" />
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <Label Content="Max distance :"/>
-                <Label Content="{Binding SiftMaxDistance}" />
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <Label Content="Good matches :"/>
-                <Label Content="{Binding SiftGoodResultCnt}" />
-            </UniformGrid>
-            <UniformGrid Columns="2">
-                <Label Content="Ratio good matches :"/>
-                <Label Content="{Binding SiftGoodResultRatio}" />
-            </UniformGrid>
+                <Label Height="40"/>
+                <Label Content="Homotetie :"/>
+                <UniformGrid Rows="3" Columns="3">
+                    <UniformGrid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Center"/>
+                        </Style>
+                    </UniformGrid.Resources>
+                    <TextBlock Text="{Binding Hom00, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom01, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom02, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom10, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom11, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom12, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom20, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom21, StringFormat=f3}"/>
+                    <TextBlock Text="{Binding Hom22, StringFormat=f3}"/>
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <Label Content="Min distance :"/>
+                    <Label Content="{Binding SiftMinDistance}" />
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <Label Content="Max distance :"/>
+                    <Label Content="{Binding SiftMaxDistance}" />
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <Label Content="Good matches :"/>
+                    <Label Content="{Binding SiftGoodResultCnt}" />
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <Label Content="Ratio good matches :"/>
+                    <Label Content="{Binding SiftGoodResultRatio}" />
+                </UniformGrid>
                 <UniformGrid Columns="2">
                     <Label Content="RMSE :"/>
                     <Label Content="{Binding SiftRMSE}" FontWeight="Bold" />
@@ -182,7 +183,7 @@
                 <TextBlock Text="{Binding CoeffHistoChromG, StringFormat=chromG : {0:F3}}" />
                 <TextBlock Text="{Binding CoeffHistoMean, StringFormat=Mean : {0:F3}}" FontWeight="Bold" />
             </StackPanel>
-            
+
         </StackPanel>
 
         <ListView Grid.Row="0" Grid.Column="1"
@@ -190,7 +191,7 @@
                   SelectedItem="{Binding SelectedImage1}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <local:ImageViewer Source="{Binding .}" 
+                    <views:ImageViewer Source="{Binding .}" 
                                        Width="120"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -203,7 +204,7 @@
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
-            <local:ImageViewer Source="{Binding ImageSource1}" 
+            <views:ImageViewer Source="{Binding ImageSource1}" 
                    AllowDrop="true"
                    Drop="Image1_Drop"/>
         </Border>
@@ -216,7 +217,7 @@
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
-            <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+            <views:ImageViewer Grid.Row="1" Grid.Column="1" 
                Source="{Binding ImageSource2}"
                    AllowDrop="true"
                    Drop="Image2_Drop" />
@@ -231,7 +232,7 @@
                   SelectedItem="{Binding SelectedImage2}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <local:ImageViewer Source="{Binding .}" 
+                    <views:ImageViewer Source="{Binding .}" 
                                        Width="120"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -243,7 +244,7 @@
         <Button Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" 
                 Content="Swap"
                 Command="{Binding SwapImageCommand}"/>
-        
+
         <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="6"
                   x:Name="cbImageStep"
                   VerticalAlignment="Top"
@@ -259,7 +260,7 @@
                 BorderThickness="1"
                 Background="Gray"
                 BorderBrush="Brown">
-                <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+                <views:ImageViewer Grid.Row="1" Grid.Column="1" 
                Source="{Binding ImageResult2}" />
             </Border>
 
@@ -270,19 +271,19 @@
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding CurImageStep}" Value="{x:Static local:ImageStep.SIFTResult}">
+                            <DataTrigger Binding="{Binding CurImageStep}" Value="{x:Static vm:ImageStep.SIFTResult}">
                                 <Setter Property="Grid.ColumnSpan" Value="2" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding CurImageStep}" Value="{x:Static local:ImageStep.SIFTGoodResult}">
+                            <DataTrigger Binding="{Binding CurImageStep}" Value="{x:Static vm:ImageStep.SIFTGoodResult}">
                                 <Setter Property="Grid.ColumnSpan" Value="2" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <local:ImageViewer Grid.Row="1" Grid.Column="1" 
+                <views:ImageViewer Grid.Row="1" Grid.Column="1" 
                Source="{Binding ImageResult1}" />
             </Border>
         </Grid>
-                
+
     </Grid>
-</Window>
+</UserControl>

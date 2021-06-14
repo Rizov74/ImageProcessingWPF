@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace ImageProcessingWPF
+namespace ImageProcessingWPF.Tools
 {
     public abstract class ObservableObject : INotifyPropertyChanged
     {

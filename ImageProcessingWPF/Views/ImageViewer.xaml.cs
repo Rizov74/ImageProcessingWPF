@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ImageProcessingWPF
+namespace ImageProcessingWPF.Views
 {
     /// <summary>
     /// Logique d'interaction pour ImageViewer.xaml
