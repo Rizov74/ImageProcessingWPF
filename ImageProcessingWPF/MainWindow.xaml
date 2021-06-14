@@ -27,7 +27,8 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="4"
                     Orientation="Vertical"
                     IsEnabled="{Binding IsAlive}">
-            
+            <StackPanel Orientation="Vertical"
+                        Background="gray">
             <Button Command="{Binding SIFTCommand}"
                      Height="25"
                     Content="SIFT" />
@@ -121,11 +122,67 @@
                 <Label Content="Ratio good matches :"/>
                 <Label Content="{Binding SiftGoodResultRatio}" />
             </UniformGrid>
-            <UniformGrid Columns="2">
-                <Label Content="RMSE :"/>
-                <Label Content="{Binding SiftRMSE}" FontWeight="Bold" />
-            </UniformGrid>
+                <UniformGrid Columns="2">
+                    <Label Content="RMSE :"/>
+                    <Label Content="{Binding SiftRMSE}" FontWeight="Bold" />
+                </UniformGrid>
+            </StackPanel>
 
+            <StackPanel Orientation="Vertical"
+                        Margin="0,20,0,0"
+                        Background="Gray">
+                <Button Content="Histo"
+                        Command="{Binding HistoCompareCommand}"/>
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Histo width"
+                           VerticalAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding HistoWidth}"/>
+                </UniformGrid>
+
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Histo height"
+                           VerticalAlignment="Center" />
+                    <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding HistoHeight}"/>
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <TextBlock Text="StackHistoCount"
+                           VerticalAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding StackHistoCount}"/>
+                </UniformGrid>
+
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Blur"
+                           VerticalAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding BlurSize}"/>
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <TextBlock Text="Dir thresh"
+                           VerticalAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Stretch"
+                     Height="25"
+                     Text="{Binding DirectionThreshold}"/>
+                </UniformGrid>
+
+
+                <TextBlock Text="{Binding CoeffHisto, StringFormat=gray : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoHue, StringFormat=hue : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoR, StringFormat=red : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoG, StringFormat=green : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoB, StringFormat=blue : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoDir, StringFormat=dir : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoChromR, StringFormat=chromR : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoChromG, StringFormat=chromG : {0:F3}}" />
+                <TextBlock Text="{Binding CoeffHistoMean, StringFormat=Mean : {0:F3}}" FontWeight="Bold" />
+            </StackPanel>
+            
         </StackPanel>
 
         <ListView Grid.Row="0" Grid.Column="1"
@@ -186,17 +243,11 @@
         <Button Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" 
                 Content="Swap"
                 Command="{Binding SwapImageCommand}"/>
-
-        
         
         <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="6"
                   x:Name="cbImageStep"
                   VerticalAlignment="Top"
                   SelectedValue="{Binding CurImageStep}"/>
-
-
-
-        
 
         <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="6">
             <Grid.ColumnDefinitions>
@@ -232,7 +283,6 @@
                Source="{Binding ImageResult1}" />
             </Border>
         </Grid>
-        
-        
+                
     </Grid>
 </Window>
