@@ -13,6 +13,10 @@
             <views:ImageComparator />
         </TabItem>
 
+        <TabItem Header="Property test">
+            <views:PropertyImageComparator />
+        </TabItem>
+        
         <TabItem Header="String">
             <views:StringComparator />
         </TabItem>
